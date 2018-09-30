@@ -6,7 +6,7 @@
 		_E("E", float) = 0
 		_Samples("Samples", float) = 1
 		_MaxRange ("MaxRange", float) = 1
-		_Offset ("Offset", float) = 0.001
+		_Offset ("Offset", float) = 0.01
 	}
 	SubShader
 	{
@@ -35,7 +35,8 @@
 			float _Samples;
 			float _E;
 
-			float4 _Vertices[9000];
+			float4 _Vertices[1000];
+			//float _Indices[1000]; 
 
 			float _TriangleCount;
 
@@ -106,9 +107,12 @@
 				float t = 0;
 
 				for (int i = 0; i < _TriangleCount; i+=3) {
-					float3 v0 = _Vertices[i * 3];
-					float3 v1 = _Vertices[i * 3 + 1];
-					float3 v2 = _Vertices[i * 3 + 2];
+					//float i0 = _Indices[i * 3];
+					//float i1 = _Indices[i * 3 + 1];
+					//float i2 = _Indices[i * 3 + 2];
+					float3 v0 = _Vertices[i*3];
+					float3 v1 = _Vertices[i*3+1];
+					float3 v2 = _Vertices[i*3+2];
 
 					t += min(_MaxRange, raycast(dir, origin, v0, v1, v2));
 				}
@@ -152,6 +156,8 @@
 				}
 
 				t /= ((_Samples + 1) * (_Samples + 1));
+
+				t = saturate(t / _MaxRange);
 
 				col.rgb *= t;
 				return col;

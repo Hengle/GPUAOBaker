@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Collections;
+using System.Collections.Generic;
 
 public class BakeTestWindow : EditorWindow
 {
-    private Mesh m_Mesh;
+    private MeshFilter m_Mesh;
     private Material m_Material;
     private int m_Filter;
 
@@ -16,7 +16,7 @@ public class BakeTestWindow : EditorWindow
 
     void OnGUI()
     {
-        m_Mesh = EditorGUILayout.ObjectField("Mesh", m_Mesh, typeof (Mesh), false) as Mesh;
+        m_Mesh = EditorGUILayout.ObjectField("Mesh", m_Mesh, typeof (MeshFilter), true) as MeshFilter;
         m_Material = EditorGUILayout.ObjectField("Material", m_Material, typeof(Material), false) as Material;
         m_Filter = EditorGUILayout.IntSlider("Filter", m_Filter, 0, 4);
 
@@ -27,7 +27,7 @@ public class BakeTestWindow : EditorWindow
         if (GUILayout.Button("BakeScene"))
         {
             PickScene();
-            //Bake();
+            Bake();
         }
     }
 
@@ -35,19 +35,44 @@ public class BakeTestWindow : EditorWindow
     {
         MeshFilter[] mfs = FindObjectsOfType<MeshFilter>();
 
-        Vector4[] vectors = new Vector4[1000];
+        List<Vector4> vlist = new List<Vector4>();
+        //List<float> ilist = new List<float>();
 
-        int count = 0;
+        //int icount = 0;
+        int vcount = 0;
         for (int i = 0; i < mfs.Length; i++)
         {
-            count += mfs[i].sharedMesh.triangles.Length*3;
+            if (mfs[i] == m_Mesh)
+                continue;
+            vcount += mfs[i].sharedMesh.vertexCount;
+            //icount += mfs[i].sharedMesh.triangles.Length;
+
+            //for (int j = 0; j < mfs[i].sharedMesh.vertexCount; j++)
+            //{
+            //    Vector3 v = mfs[i].transform.localToWorldMatrix.MultiplyPoint(mfs[i].sharedMesh.vertices[j]);
+            //    vlist.Add(v);
+            //}
+            for (int j = 0; j < mfs[i].sharedMesh.triangles.Length; j++)
+            {
+                Vector3 v = mfs[i].sharedMesh.vertices[mfs[i].sharedMesh.triangles[j]];
+                v = mfs[i].transform.localToWorldMatrix.MultiplyPoint(v);
+
+                vlist.Add(v);
+                //ilist.Add(mfs[i].sharedMesh.triangles[j]);
+            }
         }
-        Debug.Log(count);
+        Debug.Log(vlist.Count/3);
+
+        int icount = vlist.Count/3;
+
+        m_Material.SetVectorArray("_Vertices", vlist);
+        ////m_Material.SetFloatArray("_Indices", ilist);
+        m_Material.SetFloat("_TriangleCount", icount);
     }
 
     private void Bake()
     {
-        if (!m_Mesh)
+        if (!m_Mesh || !m_Mesh.sharedMesh)
             return;
         if (!m_Material)
             return;
@@ -61,7 +86,7 @@ public class BakeTestWindow : EditorWindow
         RenderTexture.active = rt;
 
         m_Material.SetPass(0);
-        Graphics.DrawMeshNow(m_Mesh, Matrix4x4.identity);
+        Graphics.DrawMeshNow(m_Mesh.sharedMesh, m_Mesh.transform.localToWorldMatrix);
 
         RenderTexture.active = tmp;
 
