@@ -38,7 +38,7 @@
 			float4 _Vertices[1000];
 			//float _Indices[1000]; 
 
-			float _TriangleCount;
+			float _VertexCount;
 
 			float _MaxRange;
 			float _Offset;
@@ -55,69 +55,84 @@
 				return float3(pu, pv, pw);
 			}
 
-			float raycast(float3 dir, float3 origin, float3 v0, float v1, float v2) {
-				float3 o = origin + dir*_Offset;
+			bool raycast(float3 dir, float3 orig, float3 p0, float3 p1, float3 p2, inout float rt) {
+				rt = _MaxRange;
 
-				float2 uv;
-				float t;
+				float3 o = orig + dir * _Offset;
 
-				float3 E1 = v1 - v0;
-				
-				float3 E2 = v2 - v0;
-				
-				float3 P = cross(dir, E2);
-				
-				float det = dot(E1, P);
-				float3 T;
-				
-				if (det >0)
+				float3 e1 = p1 - p0;
+				float3 e2 = p2 - p0;
+
+				float v = 0;
+				float u = 0;
+
+				float3 n = cross(e1, e2);
+				float ndv = dot(dir, n);
+				if (ndv > 0.0)
 				{
-					T = origin - v0;
+					return false;
+				}
+
+				float3 p = cross(dir, e2);
+
+				float det = dot(e1, p);
+				float3 t = float3(0,0,0);
+				if (det > 0.0)
+				{
+					t = o - p0;
 				}
 				else
 				{
-					T = v0 - origin;
+					t = p0 - o;
 					det = -det;
 				}
-				if (det < 0.0001f) {
-					return _MaxRange;
+				if (det < 0.0000001f)
+				{
+					return false;
 				}
-				
-				uv.x = dot(T, P);
-				
-				if (uv.x < 0.0f || uv.x > det)
-					return _MaxRange;
-				
-				float3 Q = cross(T, E1);
-				
-				uv.y = dot(dir, Q);
-				if (uv.y < 0.0f || uv.x + uv.y > det)
-					return _MaxRange;
-				
-				t = dot(E2, Q);
-				
-				float fInvDet = 1.0f / det;
-				
-				t *= fInvDet;
-				
-				return t;
+
+				u = dot(t, p);
+				if (u < 0.0f || u > det)
+					return false;
+
+				float3 q = cross(t, e1);
+
+				v = dot(dir, q);
+				if (v < 0.0f || u + v > det)
+					return false;
+
+				rt = dot(e2, q);
+
+				float finvdet = 1.0f / det;
+				rt *= finvdet;
+				if (rt < 0.001f)
+					return false;
+				u *= finvdet;
+				v *= finvdet;
+
+				return true;
 			}
 
 			float raycast_scene(float3 dir, float3 origin) {
-				float t = 0;
+				float t = _MaxRange;
 
-				for (int i = 0; i < _TriangleCount; i+=3) {
+				for (int i = 0; i < (int)_VertexCount; i+=3) {
 					//float i0 = _Indices[i * 3];
 					//float i1 = _Indices[i * 3 + 1];
 					//float i2 = _Indices[i * 3 + 2];
-					float3 v0 = _Vertices[i*3];
-					float3 v1 = _Vertices[i*3+1];
-					float3 v2 = _Vertices[i*3+2];
+					float3 v0 = _Vertices[i].xyz;
+					float3 v1 = _Vertices[i+1].xyz;
+					float3 v2 = _Vertices[i+2].xyz;
 
-					t += min(_MaxRange, raycast(dir, origin, v0, v1, v2));
+					float tmpt;
+					bool result = raycast(dir, origin, v0, v1, v2, tmpt);
+
+					if (result) {
+						if (tmpt < t)
+							t = tmpt;
+					}
 				}
 
-				t /= _TriangleCount;
 				return t;
 			}
 			
@@ -155,11 +170,14 @@
 					}
 				}
 
+				//t = raycast_scene(input.worldNormal, input.worldPos);
+
 				t /= ((_Samples + 1) * (_Samples + 1));
 
 				t = saturate(t / _MaxRange);
 
 				col.rgb *= t;
+
 				return col;
 			}
 			ENDCG

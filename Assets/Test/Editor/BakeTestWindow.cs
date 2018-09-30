@@ -67,7 +67,7 @@ public class BakeTestWindow : EditorWindow
 
         m_Material.SetVectorArray("_Vertices", vlist);
         ////m_Material.SetFloatArray("_Indices", ilist);
-        m_Material.SetFloat("_TriangleCount", icount);
+        m_Material.SetFloat("_VertexCount", vlist.Count);
     }
 
     private void Bake()
