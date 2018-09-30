@@ -24,6 +24,25 @@ public class BakeTestWindow : EditorWindow
         {
             Bake();
         }
+        if (GUILayout.Button("BakeScene"))
+        {
+            PickScene();
+            //Bake();
+        }
+    }
+
+    private void PickScene()
+    {
+        MeshFilter[] mfs = FindObjectsOfType<MeshFilter>();
+
+        Vector4[] vectors = new Vector4[1000];
+
+        int count = 0;
+        for (int i = 0; i < mfs.Length; i++)
+        {
+            count += mfs[i].sharedMesh.triangles.Length*3;
+        }
+        Debug.Log(count);
     }
 
     private void Bake()

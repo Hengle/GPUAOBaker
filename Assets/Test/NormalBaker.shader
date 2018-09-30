@@ -2,6 +2,7 @@
 {
 	Properties
 	{
+		_Sky ("Sky", cube) = "" {}
 	}
 	SubShader
 	{
@@ -22,6 +23,8 @@
 				float3 normal : TEXCOORD0;
 				float4 vertex : SV_POSITION;
 			};
+
+			samplerCUBE _Sky;
 			
 			v2f vert (appdata_full v)
 			{
@@ -32,16 +35,19 @@
 
 				//float3 normal = mul(rotation, v.normal);
 
-				o.normal = v.normal * 0.5 + 0.5;
+				o.normal = v.normal;// *0.5 + 0.5;
 
 				return o;
 			}
 			
 			float4 frag (v2f i) : SV_Target
 			{
-				float4 col;
-				col.rgb = i.normal;
+				//float4 col;
+				//col.rgb = i.normal;
+				//col.a = 1.0;
+				float4 col = texCUBE(_Sky, i.normal);
 				col.a = 1.0;
+
 				return col;
 			}
 			ENDCG
