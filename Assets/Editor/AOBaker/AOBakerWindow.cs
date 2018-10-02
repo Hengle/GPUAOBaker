@@ -19,6 +19,8 @@ public class AOBakerWindow : EditorWindow
 
     private MeshRenderer m_Target;
 
+    private Texture2D m_Result;
+
     private BakeSettings m_BakeSettings = new BakeSettings()
     {
         traceRadius  = AOBakeConstants.kDefaultTraceRadius,
@@ -127,7 +129,18 @@ public class AOBakerWindow : EditorWindow
 
         if (GUI.Button(new Rect(rect.x + rect.width * 0.5f - 50, rect.y + rect.height - 25, 100, 20), styles.bake))
         {
-            AOBakeUtils.BakeScene(m_Target, m_StaticOnly, m_IgnoreSkinned, m_BakeSettings);
+            string savePath = EditorUtility.SaveFilePanel("", "", "", "png");
+            if (string.IsNullOrEmpty(savePath))
+                return;
+            var result = AOBakeUtils.BakeScene(m_Target, m_StaticOnly, m_IgnoreSkinned, m_BakeSettings);
+
+            if (result)
+            {
+                byte[] buffer = result.EncodeToPNG();
+                System.IO.File.WriteAllBytes(savePath, buffer);
+
+                Object.DestroyImmediate(result);
+            }
         }
     }
 

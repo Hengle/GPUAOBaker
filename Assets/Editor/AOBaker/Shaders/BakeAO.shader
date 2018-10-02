@@ -4,10 +4,10 @@
 	{
 		_PreTex ("PreTex", 2D) = "white" {}      //保留上一次采样的结果
 		_E("E", float) = 0
-		_Sample0 ("Sample0", vector) = (0,0,0,0) //采样坐标0
-		_Sample1 ("Sample1", vector) = (0,0,0,0) //采样坐标1
-		_Sample2 ("Sample2", vector) = (0,0,0,0) //采样坐标2
-		_Sample3 ("Sample3", vector) = (0,0,0,0) //采样坐标3
+		_Sample0 ("Sample0", vector) = (0.5,0.5,0,0) //采样坐标0
+		_Sample1 ("Sample1", vector) = (0.5,0.5,0,0) //采样坐标1
+		_Sample2 ("Sample2", vector) = (0.5,0.5,0,0) //采样坐标2
+		//_Sample3 ("Sample3", vector) = (0.5,0.5,0,0) //采样坐标3
 		_TraceRadius ("TraceRadius", float) = 1  //光线追踪有效半径
 		_Bias ("Bias", float) = 0.0001           
 	}
@@ -40,7 +40,7 @@
 			float2 _Sample0;
 			float2 _Sample1;
 			float2 _Sample2;
-			float2 _Sample3;
+			//float2 _Sample3;
 
 			float _TraceRadius;
 			float _Bias;
@@ -173,13 +173,15 @@
 			{
 				float4 pre = tex2D(_PreTex, input.texcoord);
 
-				float4 col = float4(1,1,1,1);
+				float4 col = float4(1,1,1,0);
 
 				//对四个采样坐标做光线追踪
 				col.r = min(pre.r, raytracing(input, _Sample0));
 				col.g = min(pre.g, raytracing(input, _Sample1));
 				col.b = min(pre.b, raytracing(input, _Sample2));
-				col.a = min(pre.a, raytracing(input, _Sample3));
+				//col.a = min(pre.a, raytracing(input, _Sample3));
+
+				col.a = pre.a;
 
 				return col;
 			}
