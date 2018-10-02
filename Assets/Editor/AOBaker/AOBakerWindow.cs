@@ -21,11 +21,11 @@ public class AOBakerWindow : EditorWindow
 
     private BakeSettings m_BakeSettings = new BakeSettings()
     {
-        traceRadius = 1.0f,
-        samplerType = SamplerType.Hammersley,
-        numSamples = 5,
-        aoMapSize = 1024,
-        aoMapPadding = 2,
+        traceRadius  = AOBakeConstants.kDefaultTraceRadius,
+        samplerType  = AOBakeConstants.kDefaultSamplerType,
+        numSamples   = AOBakeConstants.kDefaultNumSamples,
+        aoMapSize    = AOBakeConstants.kDefaultAOMapSize,
+        aoMapPadding = AOBakeConstants.kDefaultAOMapPadding,
     };
 
     private enum Page
