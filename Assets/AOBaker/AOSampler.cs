@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
 namespace ASL.AOBaker
 {
-    enum SamplerType
+    public enum SamplerType
     {
         /// <summary>
         /// 随机采样

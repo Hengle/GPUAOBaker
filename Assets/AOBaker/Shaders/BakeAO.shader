@@ -46,6 +46,11 @@
 			float _Bias;
 
 			float4 _Vertices[1000];
+			//sampler2D _VertexTex;
+			//int _TexSize;
+			float4x4 _LocalToWorld;
+			//float3 _BoundsMin;
+			//float3 _BoundsSize;
 			float _VertexCount;
 
 			/*
@@ -124,16 +129,48 @@
 				return true;
 			}
 
+			/*float3 SampleVertex(float2 uv) {
+				float4 pos = tex2D(_VertexTex, uv);
+				pos.xyz = pos.xyz * _BoundsSize + _BoundsMin;
+				pos.w = 1.0;
+				pos = mul(_LocalToWorld, pos);
+				return pos.xyz;
+			}*/
+
 			/*
 				对场景进行光线追踪
 			*/
 			float raytracing_scene(float3 dir, float3 origin) {
 				float t = _TraceRadius;
 
+				//float deltaSize = 1.0 / _TexSize;
+				//int x = 0; int y = 0;
+
 				for (int i = 0; i < (int)_VertexCount; i += 3) {
-					float3 v0 = _Vertices[i].xyz;
-					float3 v1 = _Vertices[i + 1].xyz;
-					float3 v2 = _Vertices[i + 2].xyz;
+					float3 v0 = mul(_LocalToWorld, _Vertices[i]).xyz;
+					float3 v1 = mul(_LocalToWorld, _Vertices[i + 1]).xyz;
+					float3 v2 = mul(_LocalToWorld, _Vertices[i + 2]).xyz;
+
+					/*float3 v0 = SampleVertex(float2(x*deltaSize + deltaSize * 0.5, y*deltaSize + deltaSize * 0.5));
+					x += 1;
+					if (x >= _TexSize) {
+						x = 0;
+						y += 1;
+					}
+
+					float3 v1 = SampleVertex(float2(x*deltaSize + deltaSize * 0.5, y*deltaSize + deltaSize * 0.5));
+					x += 1;
+					if (x >= _TexSize) {
+						x = 0;
+						y += 1;
+					}
+
+					float3 v2 = SampleVertex(float2(x*deltaSize + deltaSize * 0.5, y*deltaSize + deltaSize * 0.5));
+					x += 1;
+					if (x >= _TexSize) {
+						x = 0;
+						y += 1;
+					}*/
 
 					float tmpt;
 					bool result = raycast_triangle(dir, origin, v0, v1, v2, tmpt);
@@ -179,6 +216,9 @@
 				col.r = min(pre.r, raytracing(input, _Sample0));
 				col.g = min(pre.g, raytracing(input, _Sample1));
 				col.b = min(pre.b, raytracing(input, _Sample2));
+				//col.r = raytracing(input, _Sample0);
+				//col.g = raytracing(input, _Sample1);
+				//col.b = raytracing(input, _Sample2);
 				//col.a = min(pre.a, raytracing(input, _Sample3));
 
 				col.a = pre.a;

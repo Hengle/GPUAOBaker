@@ -8,6 +8,9 @@ public class AOBakerWindow : EditorWindow
 {
 
     private Vector2 m_SettingScrollerVector;
+    private Vector2 m_PreviewScrollerVector;
+    private float m_PreviewTextureHeight = 128;
+    private bool m_IsDragPreviewArea = false;
     private bool m_BakeSettingFoldOut = true;
     private bool m_AOMapSettingFoldOut = true;
     private bool m_OtherSettingFoldOut = true;
@@ -52,12 +55,19 @@ public class AOBakerWindow : EditorWindow
         public GUIContent ignoreSkinned = new GUIContent("Ignore SkinnedMeshRenderer");
         public GUIContent aoTarget = new GUIContent("AO Target");
         public GUIContent bake = new GUIContent("Bake");
+        public GUIContent collect = new GUIContent("Collect");
+        public GUIContent save = new GUIContent("Save");
         public GUIContent pixels = new GUIContent("texels");
+        public  GUIContent aoMap = new GUIContent("AO Map");
 
         public GUIContent[] sizes =
             {new GUIContent("256"), new GUIContent("512"), new GUIContent("1024"), new GUIContent("2048")};
         public GUIStyle buttonLeft = "ButtonLeft";
         public GUIStyle buttonRight = "ButtonRight";
+        public GUIStyle buttonMid = "ButtonMid";
+        public GUIStyle windowBottom = "WindowBottomResize";
+        public GUIStyle toolbar = "Toolbar";
+        public GUIStyle background = "GameViewBackground";
     }
 
     private static Styles sStyles;
@@ -73,6 +83,8 @@ public class AOBakerWindow : EditorWindow
     }
 
     private Page m_SelectionPage = Page.SettingPage;
+
+    private List<AOBakeBatch> m_Batches;
 
     [MenuItem("Tools/AOBaker")]
     static void Init()
@@ -127,21 +139,32 @@ public class AOBakerWindow : EditorWindow
 
         GUILayout.EndArea();
 
-        if (GUI.Button(new Rect(rect.x + rect.width * 0.5f - 50, rect.y + rect.height - 25, 100, 20), styles.bake))
+        DrawBottomBarGUI(rect, rect.height - 25);
+    }
+
+    private void DrawBottomBarGUI(Rect rect, float posY)
+    {
+        if (GUI.Button(new Rect(rect.x + rect.width * 0.5f - 150, rect.y + posY, 100, 20), styles.collect, styles.buttonLeft))
         {
-            string savePath = EditorUtility.SaveFilePanel("", "", "", "png");
-            if (string.IsNullOrEmpty(savePath))
-                return;
-            var result = AOBakeUtils.BakeScene(m_Target, m_StaticOnly, m_IgnoreSkinned, m_BakeSettings);
-
-            if (result)
-            {
-                byte[] buffer = result.EncodeToPNG();
-                System.IO.File.WriteAllBytes(savePath, buffer);
-
-                Object.DestroyImmediate(result);
-            }
+            m_Batches = AOBakeUtils.CollectBatches(m_StaticOnly, m_IgnoreSkinned);
         }
+        if (GUI.Button(new Rect(rect.x + rect.width * 0.5f - 50, rect.y + posY, 100, 20), styles.bake, styles.buttonMid))
+        {
+            if (m_Batches == null)
+                m_Batches = AOBakeUtils.CollectBatches(m_StaticOnly, m_IgnoreSkinned);
+            
+            m_Result = AOBakeUtils.BakeScene(m_Target, m_Batches, m_BakeSettings);
+        }
+
+        bool guiEnable = GUI.enabled;
+        GUI.enabled = m_Result != null;
+
+        if (GUI.Button(new Rect(new Rect(rect.x + rect.width * 0.5f + 50, rect.y + posY, 100, 20)), styles.save, styles.buttonRight))
+        {
+            Save();
+        }
+
+        GUI.enabled = guiEnable;
     }
 
     private void OnBakeSettingGUI()
@@ -194,6 +217,57 @@ public class AOBakerWindow : EditorWindow
 
     private void OnPreviewPageGUI(Rect rect)
     {
+        DrawBottomBarGUI(rect, 30);
 
+        Rect dragRect = new Rect(rect.x + 20, rect.y + rect.height - m_PreviewTextureHeight - 18, rect.width - 40, 18);
+
+        if (Event.current.type == EventType.MouseDown && dragRect.Contains(Event.current.mousePosition))
+        {
+            m_IsDragPreviewArea = true;
+        }
+        else if (Event.current.type == EventType.MouseUp)
+            m_IsDragPreviewArea = false;
+        else if (Event.current.type == EventType.MouseDrag && m_IsDragPreviewArea)
+        {
+            m_PreviewTextureHeight = Mathf.Clamp(position.height - Event.current.mousePosition.y - 18, 100, position.width-40);
+            Repaint();
+        }
+
+        EditorGUIUtility.AddCursorRect(dragRect, MouseCursor.ResizeVertical);
+
+        GUI.Box(new Rect(rect.x, rect.y + rect.height - m_PreviewTextureHeight - 18, rect.width, 18), string.Empty,
+            styles.toolbar);
+        GUI.Box(new Rect(rect.x + 20, rect.y + rect.height - m_PreviewTextureHeight - 11, rect.width - 40, 11),
+            string.Empty, styles.windowBottom);
+
+        GUI.Box(new Rect(rect.x, rect.y + rect.height - m_PreviewTextureHeight, rect.width, m_PreviewTextureHeight),string.Empty, styles.background );
+        
+    
+        if (m_Result)
+        {
+            Rect texturePos = new Rect(rect.x + rect.width * 0.5f - m_PreviewTextureHeight * 0.5f,
+                rect.y + rect.height - m_PreviewTextureHeight, m_PreviewTextureHeight, m_PreviewTextureHeight);
+
+            GUI.DrawTexture(texturePos, m_Result);
+        }
+    }
+
+    private void Save()
+    {
+        if (m_Result)
+        {
+            string savePath = EditorUtility.SaveFilePanel("", "", "", "png");
+            if (string.IsNullOrEmpty(savePath))
+                return;
+
+            byte[] buffer = m_Result.EncodeToPNG();
+            System.IO.File.WriteAllBytes(savePath, buffer);
+
+            savePath = FileUtil.GetProjectRelativePath(savePath);
+            if (!string.IsNullOrEmpty(savePath))
+                AssetDatabase.ImportAsset(savePath);
+
+            Object.DestroyImmediate(m_Result);
+        }
     }
 }
