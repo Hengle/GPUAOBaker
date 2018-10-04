@@ -27,3 +27,6 @@
 https://zhuanlan.zhihu.com/p/45335463
 
 采样器相关算法与半球映射相关算法参考《光线跟踪算法技术》 [美]萨芬著 刘天慧译(清华大学出版社)
+
+### 我的博客：
+http://www.lsngo.net/2018/10/04/unityeditor_gpuaobaker/
