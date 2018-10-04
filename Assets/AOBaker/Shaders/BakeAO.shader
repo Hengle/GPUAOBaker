@@ -16,6 +16,7 @@
 
 		Pass
 		{
+			cull off
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
