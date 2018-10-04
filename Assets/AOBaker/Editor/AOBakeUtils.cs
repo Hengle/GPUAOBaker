@@ -12,7 +12,7 @@ namespace ASL.AOBaker
         public const string kAOMixShader = "Assets/AOBaker/Shaders/AOMix.shader";
         public const float kDefaultTraceRadius = 1f;
         public const SamplerType kDefaultSamplerType = SamplerType.Hammersley;
-        public const int kDefaultNumSamples = 5;
+        public const int kDefaultNumSamples = 25;
         public const int kMinNumSamples = 3;
         public const int kMaxNumSamples = 128;
         public const int kDefaultAOMapSize = 1024;
