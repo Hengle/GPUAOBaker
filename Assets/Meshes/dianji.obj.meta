@@ -1,24 +1,19 @@
 fileFormatVersion: 2
-guid: 96706fff39a12804b883920c26426c83
-timeCreated: 1538622108
+guid: 4304bb80fd284d44d8b340318c46ec8a
+timeCreated: 1538653381
 licenseType: Pro
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
     100000: //RootNode
-    100002: hongsexiaofangzi
-    100004: Object01
+    100002: tfb_000040_dianji
     400000: //RootNode
-    400002: hongsexiaofangzi
-    400004: Object01
-    2300000: hongsexiaofangzi
-    2300002: Object01
-    3300000: hongsexiaofangzi
-    3300002: Object01
-    4300000: hongsexiaofangzi
-    4300002: Object01
+    400002: tfb_000040_dianji
+    2300000: tfb_000040_dianji
+    3300000: tfb_000040_dianji
+    4300000: tfb_000040_dianji
   materials:
-    importMaterials: 0
+    importMaterials: 1
     materialName: 0
     materialSearch: 1
   animations:
