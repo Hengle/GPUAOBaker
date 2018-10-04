@@ -6,7 +6,7 @@
 
 ![sample0](Doc/sample0.PNG)
 
-![Sample1](Doc/sample1.png)
+![Sample1](Doc/sample1.PNG)
 
 ### 已支持功能：
 
