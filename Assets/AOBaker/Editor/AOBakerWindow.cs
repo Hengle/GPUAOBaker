@@ -93,6 +93,15 @@ public class AOBakerWindow : EditorWindow
         window.titleContent = new GUIContent("AOBaker");
     }
 
+    void OnDestroy()
+    {
+        if (m_Result)
+        {
+            Object.DestroyImmediate(m_Result);
+            m_Result = null;
+        }
+    }
+
     void OnGUI()
     {
         OnTabGUI(new Rect(position.width * 0.5f - 100, 10, 200, 20));
@@ -183,7 +192,7 @@ public class AOBakerWindow : EditorWindow
             m_BakeSettings.samplerType =
                 (SamplerType) EditorGUILayout.EnumPopup(styles.sampler, m_BakeSettings.samplerType);
 
-            m_BakeSettings.numSamples = EditorGUILayout.IntSlider(styles.numSamples, m_BakeSettings.numSamples, 2, 20);
+            m_BakeSettings.numSamples = EditorGUILayout.IntSlider(styles.numSamples, m_BakeSettings.numSamples, AOBakeConstants.kMinNumSamples, AOBakeConstants.kMaxNumSamples);
         }
     }
 
@@ -197,7 +206,7 @@ public class AOBakerWindow : EditorWindow
             EditorGUI.indentLevel = 1;
 
             m_BakeSettings.aoMapSize = EditorGUILayout.IntPopup(styles.size, m_BakeSettings.aoMapSize, styles.sizes, m_Sizes);
-            m_BakeSettings.aoMapPadding = Mathf.Clamp(EditorGUILayout.IntField(styles.padding, m_BakeSettings.aoMapPadding), 0, 10);
+            m_BakeSettings.aoMapPadding = EditorGUILayout.IntSlider(styles.padding, m_BakeSettings.aoMapPadding, AOBakeConstants.kMinAOMapPadding, AOBakeConstants.kMaxAOMapPadding);
         }
     }
 
@@ -266,8 +275,6 @@ public class AOBakerWindow : EditorWindow
             savePath = FileUtil.GetProjectRelativePath(savePath);
             if (!string.IsNullOrEmpty(savePath))
                 AssetDatabase.ImportAsset(savePath);
-
-            Object.DestroyImmediate(m_Result);
         }
     }
 }

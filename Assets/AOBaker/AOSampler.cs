@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace ASL.AOBaker
 {
+    /// <summary>
+    /// 采样器类型
+    /// </summary>
     public enum SamplerType
     {
         /// <summary>
@@ -20,10 +23,13 @@ namespace ASL.AOBaker
         Regular,
     }
 
-    class SamplerBase
+    /// <summary>
+    /// 采样器基类
+    /// </summary>
+    abstract class SamplerBase
     {
-        private int m_NumSamples;
-        private int m_NumSets;
+        protected int m_NumSamples;
+        protected int m_NumSets;
         private int m_Index = 0;
         private int m_Jump = 0;
 
@@ -35,14 +41,14 @@ namespace ASL.AOBaker
 
         public SamplerBase(int numSamples, int numSets = 83)
         {
-            m_NumSamples = numSamples;
-            m_NumSets = numSets;
+            InitSampler(numSamples, numSets);
 
-            m_Samples = new Vector2[numSets * numSamples];
-            m_ShuffledIndices = new int[numSets * numSamples];
+            m_ShuffledIndices = new int[m_NumSets * m_NumSamples];
 
             SetupShuffledIndices();
         }
+
+        protected abstract void InitSampler(int numSamples, int numSets);
 
         public Vector2 Sample()
         {
@@ -96,6 +102,14 @@ namespace ASL.AOBaker
     {
         public RandomSampler(int numSamples, int numSets = 83) : base(numSamples, numSets)
         {
+        }
+
+        protected override void InitSampler(int numSamples, int numSets)
+        {
+            m_NumSamples = numSamples;
+            m_NumSets = numSets;
+            m_Samples = new Vector2[m_NumSets * m_NumSamples];
+
             for (int i = 0; i < numSets; i++)
             {
                 for (int j = 0; j < numSamples; j++)
@@ -111,7 +125,14 @@ namespace ASL.AOBaker
     {
         public JitteredSampler(int numSamples, int numSets = 83) : base(numSamples, numSets)
         {
-            int n = (int) Mathf.Sqrt(numSamples);
+        }
+
+        protected override void InitSampler(int numSamples, int numSets)
+        {
+            int n = (int)Mathf.Sqrt(numSamples);
+            m_NumSamples = n * n;
+            m_NumSets = numSets;
+            m_Samples = new Vector2[m_NumSets * m_NumSamples];
             int index = 0;
             for (int i = 0; i < numSets; i++)
             {
@@ -119,7 +140,7 @@ namespace ASL.AOBaker
                 {
                     for (int k = 0; k < n; k++)
                     {
-                        Vector2  sp = new Vector2((k+Random.Range(0.0f,1.0f))/n, (j + Random.Range(0.0f, 1.0f)) / n);
+                        Vector2 sp = new Vector2((k + Random.Range(0.0f, 1.0f)) / n, (j + Random.Range(0.0f, 1.0f)) / n);
                         m_Samples[index] = sp;
                         index += 1;
                     }
@@ -132,12 +153,19 @@ namespace ASL.AOBaker
     {
         public HammersleySampler(int numSamples, int numSets = 83) : base(numSamples, numSets)
         {
+        }
+
+        protected override void InitSampler(int numSamples, int numSets)
+        {
+            m_NumSamples = numSamples;
+            m_NumSets = numSets;
+            m_Samples = new Vector2[m_NumSets * m_NumSamples];
             for (int i = 0; i < numSets; i++)
             {
                 for (int j = 0; j < numSamples; j++)
                 {
                     m_Samples[i * numSamples + j] =
-                        new Vector2(((float) j) / numSamples, Phi(j));
+                        new Vector2(((float)j) / numSamples, Phi(j));
                 }
             }
         }
@@ -162,6 +190,27 @@ namespace ASL.AOBaker
         public RegularSampler(int numSamples, int numSets = 83) : base(numSamples, numSets)
         {
             int n = (int) Mathf.Sqrt(numSamples);
+            int index = 0;
+            for (int i = 0; i < numSets; i++)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    for (int k = 0; k < n; k++)
+                    {
+                        m_Samples[index] =
+                            new Vector2((0.5f + k) / n, (0.5f + j) / n);
+                        index += 1;
+                    }
+                }
+            }
+        }
+
+        protected override void InitSampler(int numSamples, int numSets)
+        {
+            int n = (int)Mathf.Sqrt(numSamples);
+            m_NumSamples = n * n;
+            m_NumSets = numSets;
+            m_Samples = new Vector2[m_NumSets * m_NumSamples];
             int index = 0;
             for (int i = 0; i < numSets; i++)
             {
