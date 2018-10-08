@@ -8,7 +8,8 @@
 		_Sample1 ("Sample1", vector) = (0.5,0.5,0,0) //采样坐标1
 		_Sample2 ("Sample2", vector) = (0.5,0.5,0,0) //采样坐标2
 		_TraceRadius ("TraceRadius", float) = 1  //光线追踪有效半径
-		_Bias ("Bias", float) = 0.0001           
+		_Bias ("Bias", float) = 0.0001      
+		_CullBack ("CullBack", float) = 1
 	}
 	SubShader
 	{
@@ -48,6 +49,8 @@
 			float4x4 _LocalToWorld;
 			float _VertexCount;
 
+			float _CullBack;
+
 			/*
 				半球体映射
 			*/
@@ -79,7 +82,7 @@
 
 				float3 n = cross(e1, e2);
 				float ndv = dot(dir, n);
-				if (ndv > 0.0)
+				if (ndv > 0.0 && _CullBack > 0.5)
 				{
 					return false;
 				}

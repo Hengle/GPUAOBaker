@@ -31,6 +31,7 @@ public class AOBakerWindow : EditorWindow
         numSamples   = AOBakeConstants.kDefaultNumSamples,
         aoMapSize    = AOBakeConstants.kDefaultAOMapSize,
         aoMapPadding = AOBakeConstants.kDefaultAOMapPadding,
+        cullBack = AOBakeConstants.kDefaultCullBack,
     };
 
     private enum Page
@@ -49,6 +50,7 @@ public class AOBakerWindow : EditorWindow
         public GUIContent otherSetting = new GUIContent("Other Settings");
         public GUIContent sampler = new GUIContent("Sampler");
         public GUIContent numSamples = new GUIContent("Number Of Samples");
+        public GUIContent cullBack = new GUIContent("Cull Back");
         public GUIContent size = new GUIContent("Resolution");
         public GUIContent padding = new GUIContent("Padding");
         public GUIContent staticOnly = new GUIContent("Static Only");
@@ -188,6 +190,7 @@ public class AOBakerWindow : EditorWindow
             m_Target = EditorGUILayout.ObjectField(styles.aoTarget, m_Target, typeof(MeshRenderer), true) as MeshRenderer;
 
             m_BakeSettings.traceRadius = Mathf.Max(0.01f, EditorGUILayout.FloatField(styles.traceRadius, m_BakeSettings.traceRadius));
+            m_BakeSettings.cullBack = EditorGUILayout.Toggle(styles.cullBack, m_BakeSettings.cullBack);
 
             m_BakeSettings.samplerType =
                 (SamplerType) EditorGUILayout.EnumPopup(styles.sampler, m_BakeSettings.samplerType);

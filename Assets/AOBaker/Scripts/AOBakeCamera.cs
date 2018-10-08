@@ -35,6 +35,10 @@ namespace ASL.AOBaker
         /// AO贴图UV边界扩展距离
         /// </summary>
         public int aoMapPadding;
+        /// <summary>
+        /// 是否裁剪背面
+        /// </summary>
+        public bool cullBack;
     }
 
     /// <summary>
@@ -248,6 +252,7 @@ namespace ASL.AOBaker
             float weight = 1.0f / (settings.numSamples * 3);
             m_MixMaterial.SetFloat("_MixFactor", weight);
             m_BakeMaterial.SetFloat("_TraceRadius", settings.traceRadius);
+            m_BakeMaterial.SetFloat("_CullBack", settings.cullBack ? 1.0f : 0.0f);
 
             m_PreTex = RenderTexture.GetTemporary(settings.aoMapSize, settings.aoMapSize);
             m_PreTex.DiscardContents(true, true);

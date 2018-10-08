@@ -19,6 +19,7 @@ namespace ASL.AOBaker
         public const int kDefaultAOMapPadding = 2;
         public const int kMinAOMapPadding = 1;
         public const int kMaxAOMapPadding = 10;
+        public const bool kDefaultCullBack = true;
     }
 
 
